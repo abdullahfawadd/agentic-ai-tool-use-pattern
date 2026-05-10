@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Tool Use Travel Agent | M Abdullah Fawad</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <header class="topbar" aria-label="Application header">
+        <div>
+          <p class="eyebrow">Lab 08 | Agentic AI Design Patterns</p>
+          <h1>Tool Use Travel Agent</h1>
+        </div>
+        <div class="student-badge">M Abdullah Fawad</div>
+      </header>
+
+      <section class="workspace" aria-label="Travel assistant workspace">
+        <div class="assistant-panel">
+          <div class="conversation" id="conversation" aria-live="polite">
+            <article class="message assistant">
+              <span class="avatar">AI</span>
+              <div>
+                <p class="message-meta">Travel assistant</p>
+                <p>
+                  Ask for weather, flight estimates, or currency conversion. I will show
+                  the structured tool calls used to answer the query.
+                </p>
+              </div>
+            </article>
+          </div>
+
+          <form class="composer" id="queryForm">
+            <label class="sr-only" for="query">Travel query</label>
+            <textarea
+              id="query"
+              rows="4"
+              placeholder="Plan a trip from Islamabad to London for 2 people. What will it cost in GBP, and what is the weather like there?"
+            ></textarea>
+            <div class="composer-actions">
+              <label class="turn-control" for="maxTurns">
+                Max turns
+                <input id="maxTurns" type="number" min="1" max="10" value="5" />
+              </label>
+              <button type="submit">Run agent</button>
+            </div>
+          </form>
+
+          <div class="chips" aria-label="Example prompts">
+            <button type="button" data-prompt="What is the current weather in Dubai?">Dubai weather</button>
+            <button
+              type="button"
+              data-prompt="I want to travel from Islamabad to London for 2 people. What will it cost in GBP, and what is the weather like there?"
+            >
+              London trip
+            </button>
+            <button
+              type="button"
+              data-prompt="Plan a complete Dubai trip for 3 people: weather, cost, and currency."
+            >
+              Max-turn demo
+            </button>
+          </div>
+        </div>
+
+        <aside class="trace-panel" aria-label="Tool trace">
+          <div class="trace-header">
+            <div>
+              <p class="eyebrow">Execution trace</p>
+              <h2>Tool calls</h2>
+            </div>
+            <span id="turnCount">0 turns</span>
+          </div>
+          <div class="tool-list" id="toolList">
+            <p class="empty">Tool calls will appear here after the agent runs.</p>
+          </div>
+        </aside>
+      </section>
+
+      <footer>
+        <span>FastAPI | Groq | Structured Tool Use Pattern</span>
+        <a href="/docs">Swagger API docs</a>
+      </footer>
+    </main>
+    <script src="/static/app.js"></script>
+  </body>
+</html>
