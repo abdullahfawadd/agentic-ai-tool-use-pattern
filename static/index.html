@@ -7,87 +7,131 @@
     <link rel="stylesheet" href="/static/styles.css" />
   </head>
   <body>
-    <main class="shell">
-      <header class="topbar" aria-label="Application header">
-        <div>
-          <p class="eyebrow">Lab 08 | Agentic AI Design Patterns</p>
-          <h1>Tool Use Travel Agent</h1>
+    <main class="app-shell">
+      <header class="app-header" aria-label="Application header">
+        <div class="brand">
+          <div class="brand-mark">TU</div>
+          <div>
+            <p class="eyebrow">Lab 08 | Agentic AI Design Patterns</p>
+            <h1>Tool Use Travel Agent</h1>
+          </div>
         </div>
-        <div class="student-badge">M Abdullah Fawad</div>
+        <div class="header-actions">
+          <a class="ghost-link" href="/docs">Swagger API</a>
+          <div class="student-badge">M Abdullah Fawad</div>
+        </div>
       </header>
 
+      <section class="status-grid" aria-label="Runtime status">
+        <article class="status-card">
+          <span>Model</span>
+          <strong id="modelName">llama-3.1-8b-instant</strong>
+        </article>
+        <article class="status-card">
+          <span>Mode</span>
+          <strong id="modeName">Checking</strong>
+        </article>
+        <article class="status-card">
+          <span>Registered tools</span>
+          <strong id="toolCount">4</strong>
+        </article>
+        <article class="status-card">
+          <span>Last run</span>
+          <strong id="lastRun">Ready</strong>
+        </article>
+      </section>
+
       <section class="workspace" aria-label="Travel assistant workspace">
-        <div class="assistant-panel">
+        <section class="assistant-panel" aria-label="Assistant conversation">
+          <div class="panel-top">
+            <div>
+              <p class="eyebrow">Assistant workspace</p>
+              <h2>Plan with structured tool calls</h2>
+            </div>
+            <span class="runtime-pill" id="runtimePill">Online</span>
+          </div>
+
           <div class="conversation" id="conversation" aria-live="polite">
             <article class="message assistant">
               <span class="avatar">AI</span>
-              <div>
+              <div class="bubble">
                 <p class="message-meta">Travel assistant</p>
-                <p>
-                  Ask for weather, flight estimates, or currency conversion. I will show
-                  the structured tool calls used to answer the query.
-                </p>
+                <p>Where are we going?</p>
               </div>
             </article>
           </div>
 
           <form class="composer" id="queryForm">
             <label class="sr-only" for="query">Travel query</label>
-            <textarea
-              id="query"
-              rows="4"
-              placeholder="Plan a trip from Islamabad to London for 2 people. What will it cost in GBP, and what is the weather like there?"
-            ></textarea>
-            <div class="composer-actions">
-              <label class="turn-control" for="maxTurns">
-                Max turns
-                <input id="maxTurns" type="number" min="1" max="10" value="5" />
-              </label>
-              <button type="submit">Run agent</button>
+            <div class="input-shell">
+              <textarea
+                id="query"
+                rows="3"
+                placeholder="Plan a trip to Karachi: weather, prayer times, and flight cost from Lahore."
+              ></textarea>
+              <div class="composer-actions">
+                <div class="chips" aria-label="Example prompts">
+                  <button type="button" data-prompt="What is the current weather in Dubai?">Dubai weather</button>
+                  <button
+                    type="button"
+                    data-prompt="I want to travel from Islamabad to London for 2 people. What will it cost in GBP, and what is the weather like there?"
+                  >
+                    London trip
+                  </button>
+                  <button
+                    type="button"
+                    data-prompt="Plan a complete Dubai trip for 3 people: weather, cost, and currency."
+                  >
+                    Max turns
+                  </button>
+                  <button
+                    type="button"
+                    data-prompt="Plan a trip to Karachi: weather, prayer times, and flight cost from Lahore."
+                  >
+                    Karachi plan
+                  </button>
+                </div>
+                <div class="run-controls">
+                  <label class="turn-control" for="maxTurns">
+                    Max turns
+                    <input id="maxTurns" type="number" min="1" max="10" value="5" />
+                  </label>
+                  <button class="run-button" type="submit">Run agent</button>
+                </div>
+              </div>
             </div>
           </form>
-
-          <div class="chips" aria-label="Example prompts">
-            <button type="button" data-prompt="What is the current weather in Dubai?">Dubai weather</button>
-            <button
-              type="button"
-              data-prompt="I want to travel from Islamabad to London for 2 people. What will it cost in GBP, and what is the weather like there?"
-            >
-              London trip
-            </button>
-            <button
-              type="button"
-              data-prompt="Plan a complete Dubai trip for 3 people: weather, cost, and currency."
-            >
-              Max-turn demo
-            </button>
-            <button
-              type="button"
-              data-prompt="Plan a trip to Karachi: weather, prayer times, and flight cost from Lahore."
-            >
-              Karachi plan
-            </button>
-          </div>
-        </div>
+        </section>
 
         <aside class="trace-panel" aria-label="Tool trace">
-          <div class="trace-header">
+          <div class="panel-top trace-top">
             <div>
               <p class="eyebrow">Execution trace</p>
-              <h2>Tool calls</h2>
+              <h2>Tool inspector</h2>
             </div>
             <span id="turnCount">0 turns</span>
           </div>
+
+          <div class="trace-summary" id="traceSummary">
+            <span class="trace-dot"></span>
+            <span>Awaiting query</span>
+          </div>
+
+          <div class="registered-tools" id="registeredTools">
+            <span>get_weather</span>
+            <span>convert_currency</span>
+            <span>estimate_flight_cost</span>
+            <span>get_prayer_times</span>
+          </div>
+
           <div class="tool-list" id="toolList">
-            <p class="empty">Tool calls will appear here after the agent runs.</p>
+            <div class="empty">
+              <strong>No tool calls yet</strong>
+              <span>The trace will appear here after the agent runs.</span>
+            </div>
           </div>
         </aside>
       </section>
-
-      <footer>
-        <span>FastAPI | Groq | Structured Tool Use Pattern</span>
-        <a href="/docs">Swagger API docs</a>
-      </footer>
     </main>
     <script src="/static/app.js"></script>
   </body>
