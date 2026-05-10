@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from tools import convert_currency, estimate_flight_cost, get_weather
+from tools import convert_currency, estimate_flight_cost, get_prayer_times, get_weather
 
 
 TOOL_SCHEMAS = [
@@ -78,6 +78,31 @@ TOOL_SCHEMAS = [
             },
         },
     },
+    {
+        "type": "function",
+        "function": {
+            "name": "get_prayer_times",
+            "description": (
+                "Get Fajr, Dhuhr, Asr, Maghrib, and Isha prayer times for a "
+                "Pakistani city. Call this when the user asks about prayer times, "
+                "namaz times, salah schedule, or mosque timing for a city."
+            ),
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "city": {
+                        "type": "string",
+                        "description": "Pakistani city, for example Islamabad, Karachi, Lahore.",
+                    },
+                    "date": {
+                        "type": "string",
+                        "description": "Requested date, for example today or 2026-05-10.",
+                    },
+                },
+                "required": ["city", "date"],
+            },
+        },
+    },
 ]
 
 
@@ -85,4 +110,5 @@ TOOL_FUNCTIONS = {
     "get_weather": get_weather,
     "convert_currency": convert_currency,
     "estimate_flight_cost": estimate_flight_cost,
+    "get_prayer_times": get_prayer_times,
 }

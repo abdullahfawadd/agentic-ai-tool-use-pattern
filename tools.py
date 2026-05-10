@@ -110,3 +110,61 @@ def estimate_flight_cost(origin: str, destination: str, passengers: int = 1) -> 
         "note": "Economy class estimate. Actual prices may vary.",
         "source": "Simulated lab fare table",
     }
+
+
+PRAYER_TIMES = {
+    "islamabad": {
+        "Fajr": "04:02 AM",
+        "Dhuhr": "12:08 PM",
+        "Asr": "04:55 PM",
+        "Maghrib": "07:02 PM",
+        "Isha": "08:30 PM",
+    },
+    "karachi": {
+        "Fajr": "04:38 AM",
+        "Dhuhr": "12:29 PM",
+        "Asr": "05:03 PM",
+        "Maghrib": "07:09 PM",
+        "Isha": "08:28 PM",
+    },
+    "lahore": {
+        "Fajr": "04:05 AM",
+        "Dhuhr": "12:04 PM",
+        "Asr": "04:50 PM",
+        "Maghrib": "06:56 PM",
+        "Isha": "08:23 PM",
+    },
+    "peshawar": {
+        "Fajr": "04:00 AM",
+        "Dhuhr": "12:11 PM",
+        "Asr": "05:00 PM",
+        "Maghrib": "07:08 PM",
+        "Isha": "08:37 PM",
+    },
+    "quetta": {
+        "Fajr": "04:29 AM",
+        "Dhuhr": "12:33 PM",
+        "Asr": "05:14 PM",
+        "Maghrib": "07:22 PM",
+        "Isha": "08:47 PM",
+    },
+}
+
+
+def get_prayer_times(city: str, date: str) -> dict:
+    """Return simulated daily prayer times for supported Pakistani cities."""
+
+    data = PRAYER_TIMES.get(city.lower().strip())
+    if not data:
+        return {
+            "error": f"No prayer time data available for {city}.",
+            "supported_cities": sorted(city.title() for city in PRAYER_TIMES),
+        }
+
+    return {
+        "city": city.title(),
+        "date": date,
+        **data,
+        "calculation_note": "Simulated lab dataset for demonstration. Verify locally for worship use.",
+        "source": "Simulated Pakistani prayer-time table",
+    }
