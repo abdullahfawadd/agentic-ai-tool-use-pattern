@@ -112,7 +112,7 @@
           "parameters": [
             {
               "name": "Authorization",
-              "value": "=Bearer {{ $env.GROQ_API_KEY }}"
+              "value": "Bearer PASTE_YOUR_ROTATED_GROQ_API_KEY_HERE"
             },
             {
               "name": "Content-Type",
