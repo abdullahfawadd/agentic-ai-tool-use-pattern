@@ -97,19 +97,16 @@ flowchart TD
 flowchart LR
     W[Webhook] --> S[Initialize State]
     S --> T[Turn Counter]
-    T --> L[Travel Assistant LLM]
+    T --> X{Stop After 4 Turns}
+    X --> L[Travel Assistant LLM]
     L --> D[Detect Tool Call]
     D --> WT[Weather Tool]
-    D --> CT[Currency Tool]
-    D --> RC[Room Cost Tool]
-    D --> TC[Transport Cost Tool]
-    WT --> I[Inject Tool Result]
-    CT --> I
-    RC --> I
-    TC --> I
-    I --> T
-    D --> F[Final Response]
-    T --> F
+    WT --> RC[Room Cost Tool]
+    RC --> TC[Transport Cost Tool]
+    TC --> CT[Currency Tool]
+    CT --> I[Inject Tool Result]
+    I --> F[Final Response]
+    X --> F
 ```
 
 ## Screenshots
@@ -159,7 +156,7 @@ The local machine used for this repository did not have the `n8n` CLI installed,
 - Prayer query calls `get_prayer_times`.
 - Karachi combined query calls weather, prayer, and flight tools.
 - `max_turns` stops long chains safely.
-- n8n workflow includes Webhook, Groq HTTP Request, Switch, Code tools, Turn Counter, and Final Response.
+- n8n workflow includes Webhook, Groq HTTP Request, deterministic Detect Tool Call routing, Code tools, Turn Counter, and Final Response.
 
 ## References
 

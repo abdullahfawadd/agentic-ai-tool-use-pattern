@@ -42,7 +42,7 @@
             {
               "id": "messages",
               "name": "messages",
-              "value": "={{ [ { role: 'system', content: 'You are a Pakistani Student Hostel Planner. Use at most one tool per turn. Tools: room, transport, weather, currency. Never repeat a tool with the same arguments. If a requested fact is already in tool results, use it. When enough facts are collected, answer briefly.' }, { role: 'user', content: $json.body.query } ] }}",
+              "value": "={{ [ { role: 'system', content: 'You are a Pakistani Student Hostel Planner. Pick needed tools for room, transport, weather, and currency. Use tool calls when a fact should be looked up.' }, { role: 'user', content: $json.body.query } ] }}",
               "type": "array"
             }
           ]
@@ -99,8 +99,8 @@
           "number": [
             {
               "value1": "={{ $json.turn_count }}",
-              "operation": "smaller",
-              "value2": 5
+              "operation": "smallerEqual",
+              "value2": 4
             }
           ]
         },
@@ -134,7 +134,7 @@
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ { model: 'llama-3.1-8b-instant', messages: (() => { const raw = $json.messages || []; const compact = raw.length > 10 ? [raw[0], raw[1], ...raw.slice(-8)].filter(Boolean) : raw; const out = []; const validToolIds = new Set(); for (const m of compact) { if (!m || !m.role) continue; if (m.role === 'assistant' && Array.isArray(m.tool_calls)) { const calls = m.tool_calls.map(tc => { const name = tc.function?.name || tc.name || tc.tool_name; const id = tc.id || tc.tool_call_id; if (!name || !id) return null; const args = typeof tc.function?.arguments === 'string' ? tc.function.arguments : JSON.stringify(tc.function?.arguments || tc.arguments || {}); return { id, type: 'function', function: { name, arguments: args } }; }).filter(Boolean); if (calls.length) { calls.forEach(tc => validToolIds.add(tc.id)); out.push({ role: 'assistant', content: m.content ?? null, tool_calls: calls }); } else if (m.content) { out.push({ role: 'assistant', content: String(m.content) }); } continue; } if (m.role === 'tool') { if (m.tool_call_id && validToolIds.has(m.tool_call_id)) { out.push({ role: 'tool', tool_call_id: m.tool_call_id, content: typeof m.content === 'string' ? m.content : JSON.stringify(m.content || {}) }); } continue; } if (['system', 'user', 'assistant'].includes(m.role)) { out.push({ role: m.role, content: String(m.content ?? '') }); } } return out; })(), temperature: 0.1, max_tokens: 220, tool_choice: 'auto', parallel_tool_calls: false, tools: [ { type: 'function', function: { name: 'get_weather', description: 'Weather by city.', parameters: { type: 'object', properties: { city: { type: 'string' } }, required: ['city'] } } }, { type: 'function', function: { name: 'convert_currency', description: 'Convert money.', parameters: { type: 'object', properties: { amount: { type: 'number' }, from_currency: { type: 'string' }, to_currency: { type: 'string' } }, required: ['amount', 'from_currency', 'to_currency'] } } }, { type: 'function', function: { name: 'get_room_cost', description: 'Hostel room cost.', parameters: { type: 'object', properties: { city: { type: 'string' }, university: { type: 'string' } }, required: ['city', 'university'] } } }, { type: 'function', function: { name: 'get_transport_cost', description: 'Transport cost.', parameters: { type: 'object', properties: { from_city: { type: 'string' }, to_city: { type: 'string' } }, required: ['from_city', 'to_city'] } } } ] } }}",
+        "jsonBody": "={{ { model: 'llama-3.1-8b-instant', messages: $json.messages, temperature: 0, max_tokens: 120, tool_choice: 'auto', parallel_tool_calls: true, tools: [ { type: 'function', function: { name: 'get_weather', description: 'Weather by city.', parameters: { type: 'object', properties: { city: { type: 'string' } }, required: ['city'] } } }, { type: 'function', function: { name: 'convert_currency', description: 'Convert money.', parameters: { type: 'object', properties: { amount: { type: 'number' }, from_currency: { type: 'string' }, to_currency: { type: 'string' } }, required: ['amount', 'from_currency', 'to_currency'] } } }, { type: 'function', function: { name: 'get_room_cost', description: 'Hostel room cost.', parameters: { type: 'object', properties: { city: { type: 'string' }, university: { type: 'string' } }, required: ['city', 'university'] } } }, { type: 'function', function: { name: 'get_transport_cost', description: 'Transport cost.', parameters: { type: 'object', properties: { from_city: { type: 'string' }, to_city: { type: 'string' } }, required: ['from_city', 'to_city'] } } } ] } }}",
         "options": {}
       },
       "id": "a028e8ec-2b21-48ea-9422-b70cf7b700ad",
@@ -146,74 +146,31 @@
         0
       ],
       "retryOnFail": true,
-      "maxTries": 3,
-      "waitBetweenTries": 5000
+      "maxTries": 2,
+      "waitBetweenTries": 3500,
+      "continueOnFail": true
     },
     {
       "parameters": {
-        "rules": {
-          "values": [
-            {
-              "conditions": {
-                "string": [
-                  {
-                    "value1": "={{ $json.route || 'final' }}",
-                    "operation": "equals",
-                    "value2": "get_weather"
-                  }
-                ]
-              },
-              "renameOutput": true,
-              "outputKey": "weather"
-            },
-            {
-              "conditions": {
-                "string": [
-                  {
-                    "value1": "={{ $json.route || 'final' }}",
-                    "operation": "equals",
-                    "value2": "convert_currency"
-                  }
-                ]
-              },
-              "renameOutput": true,
-              "outputKey": "currency"
-            },
-            {
-              "conditions": {
-                "string": [
-                  {
-                    "value1": "={{ $json.route || 'final' }}",
-                    "operation": "equals",
-                    "value2": "get_room_cost"
-                  }
-                ]
-              },
-              "renameOutput": true,
-              "outputKey": "room"
-            },
-            {
-              "conditions": {
-                "string": [
-                  {
-                    "value1": "={{ $json.route || 'final' }}",
-                    "operation": "equals",
-                    "value2": "get_transport_cost"
-                  }
-                ]
-              },
-              "renameOutput": true,
-              "outputKey": "transport"
-            }
-          ]
-        },
-        "fallbackOutput": "extra",
-        "options": {}
+        "jsCode": "const current = $items('Turn Counter').at(-1).json;\nconst query = String(current.query || current.messages?.find(m => m.role === 'user')?.content || '').toLowerCase();\nconst message = $json.choices?.[0]?.message || {};\nconst toolCalls = Array.isArray(message.tool_calls) ? message.tool_calls : [];\n\nconst cityNames = ['islamabad', 'lahore', 'karachi'];\nconst title = (text, fallback = '') => text ? text.charAt(0).toUpperCase() + text.slice(1) : fallback;\nconst mentionedCity = cityNames.find(city => query.includes(city)) || 'lahore';\nconst fromMatch = query.match(/from\\s+(islamabad|lahore|karachi)\\s+to\\s+(islamabad|lahore|karachi)/i);\nconst toCurrency = query.includes('gbp') ? 'GBP' : query.includes('usd') ? 'USD' : query.includes('aed') ? 'AED' : '';\nconst university = query.includes('punjab') ? 'Punjab University' : query.includes('nust') ? 'NUST' : 'University area';\n\nconst plan = {\n  weather: /weather|temperature|forecast/.test(query),\n  currency: /currency|convert|gbp|usd|aed|foreign/.test(query),\n  room: /hostel|room|rent|university|campus|accommodation/.test(query),\n  transport: /transport|travel|bus|train|from\\s+.+\\s+to/.test(query),\n  city: title(mentionedCity, 'Lahore'),\n  university,\n  from_city: fromMatch ? title(fromMatch[1]) : 'Islamabad',\n  to_city: fromMatch ? title(fromMatch[2]) : title(mentionedCity, 'Lahore'),\n  to_currency: toCurrency || 'PKR'\n};\n\nfor (const call of toolCalls) {\n  const name = call.function?.name;\n  let args = {};\n  try { args = JSON.parse(call.function?.arguments || '{}'); } catch (error) { args = {}; }\n  if (name === 'get_weather') { plan.weather = true; plan.city = args.city || plan.city; }\n  if (name === 'get_room_cost') { plan.room = true; plan.city = args.city || plan.city; plan.university = args.university || plan.university; }\n  if (name === 'get_transport_cost') { plan.transport = true; plan.from_city = args.from_city || plan.from_city; plan.to_city = args.to_city || plan.to_city; }\n  if (name === 'convert_currency') { plan.currency = true; plan.to_currency = args.to_currency || plan.to_currency; }\n}\n\nif (!plan.room && !plan.transport && !plan.weather && !plan.currency) {\n  plan.room = true;\n}\n\nreturn [{ json: { ...current, plan, results: {}, tool_calls: [], llm_rate_limited: Boolean($json.error) } }];"
       },
       "id": "a6f3cfd7-8b29-4a83-ab56-b8a60b48aa96",
       "name": "Detect Tool Call",
-      "type": "n8n-nodes-base.switch",
-      "typeVersion": 3,
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        80,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const plan = $json.plan || {};\nconst results = $json.results || {};\nconst calls = $json.tool_calls || [];\nif (plan.weather) {\n  const weather = {\n    islamabad: { temperature: '28 deg C', condition: 'Partly Cloudy', humidity: '55%' },\n    karachi: { temperature: '34 deg C', condition: 'Hot and Sunny', humidity: '70%' },\n    lahore: { temperature: '32 deg C', condition: 'Hazy', humidity: '60%' }\n  };\n  const city = String(plan.city || 'Lahore').toLowerCase();\n  results.weather = { city: plan.city || 'Lahore', ...(weather[city] || weather.lahore) };\n  calls.push({ tool_name: 'get_weather', arguments: { city: plan.city || 'Lahore' }, result: results.weather });\n}\nreturn [{ json: { ...$json, results, tool_calls: calls } }];"
+      },
+      "id": "e7720951-a305-4e9d-b526-a9d2cc84059e",
+      "name": "Weather Tool",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
       "position": [
         300,
         0
@@ -221,73 +178,60 @@
     },
     {
       "parameters": {
-        "jsCode": "const args = $json.arguments || {};\nconst weather = {\n  islamabad: { temperature: '28 deg C', condition: 'Partly Cloudy', humidity: '55%' },\n  karachi: { temperature: '34 deg C', condition: 'Hot and Sunny', humidity: '70%' },\n  lahore: { temperature: '32 deg C', condition: 'Hazy', humidity: '60%' }\n};\nconst city = String(args.city || 'Islamabad').toLowerCase();\nreturn [{ json: { ...$json, result: { city: args.city || 'Islamabad', ...(weather[city] || weather.islamabad) } } }];"
-      },
-      "id": "e7720951-a305-4e9d-b526-a9d2cc84059e",
-      "name": "Weather Tool",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        580,
-        -260
-      ]
-    },
-    {
-      "parameters": {
-        "jsCode": "const args = $json.arguments || {};\nconst rates = { PKR: 1, USD: 278.5, GBP: 352, AED: 75.8 };\nconst from = String(args.from_currency || 'PKR').toUpperCase();\nconst to = String(args.to_currency || 'PKR').toUpperCase();\nconst amount = Number(args.amount || 0);\nconst pkr = amount * (rates[from] || 1);\nconst converted = pkr / (rates[to] || 1);\nreturn [{ json: { ...$json, result: { original: `${amount} ${from}`, converted: `${converted.toFixed(2)} ${to}` } } }];"
+        "jsCode": "const plan = $json.plan || {};\nconst results = $json.results || {};\nconst calls = $json.tool_calls || [];\nif (plan.currency) {\n  const rates = { PKR: 1, USD: 278.5, GBP: 352, AED: 75.8 };\n  const to = String(plan.to_currency || 'PKR').toUpperCase();\n  const amount = Number(results.room?.monthly_room_cost_pkr || 24000) + Number(results.transport?.estimated_cost_pkr || 0);\n  const converted = amount / (rates[to] || 1);\n  results.currency = { original: `${amount.toLocaleString()} PKR`, converted: `${converted.toFixed(2)} ${to}` };\n  calls.push({ tool_name: 'convert_currency', arguments: { amount, from_currency: 'PKR', to_currency: to }, result: results.currency });\n}\nreturn [{ json: { ...$json, results, tool_calls: calls } }];"
       },
       "id": "34f3e472-f452-4b89-b8f6-3cf6d81b4e8c",
       "name": "Currency Tool",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        580,
-        -90
+        520,
+        0
       ]
     },
     {
       "parameters": {
-        "jsCode": "const args = $json.arguments || {};\nconst city = String(args.city || 'Lahore').toLowerCase();\nconst base = city === 'islamabad' ? 32000 : city === 'karachi' ? 26000 : 24000;\nreturn [{ json: { ...$json, result: { city: args.city || 'Lahore', university: args.university || 'University area', monthly_room_cost: `PKR ${base.toLocaleString()}`, note: 'Shared hostel room estimate near campus.' } } }];"
+        "jsCode": "const plan = $json.plan || {};\nconst results = $json.results || {};\nconst calls = $json.tool_calls || [];\nif (plan.room) {\n  const city = String(plan.city || 'Lahore').toLowerCase();\n  const base = city === 'islamabad' ? 32000 : city === 'karachi' ? 26000 : 24000;\n  results.room = { city: plan.city || 'Lahore', university: plan.university || 'University area', monthly_room_cost: `PKR ${base.toLocaleString()}`, monthly_room_cost_pkr: base, note: 'Shared hostel room estimate near campus.' };\n  calls.push({ tool_name: 'get_room_cost', arguments: { city: plan.city || 'Lahore', university: plan.university || 'University area' }, result: results.room });\n}\nreturn [{ json: { ...$json, results, tool_calls: calls } }];"
       },
       "id": "3dbac1e1-dcb3-4884-b343-73d8e15f2aca",
       "name": "Room Cost Tool",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        580,
-        80
+        740,
+        0
       ]
     },
     {
       "parameters": {
-        "jsCode": "const args = $json.arguments || {};\nconst routes = { 'lahore-karachi': 7500, 'islamabad-lahore': 3200, 'islamabad-karachi': 9000 };\nconst fromCity = String(args.from_city || '').toLowerCase();\nconst toCity = String(args.to_city || '').toLowerCase();\nconst key = `${fromCity}-${toCity}`;\nconst reverse = `${toCity}-${fromCity}`;\nconst cost = routes[key] || routes[reverse] || 5000;\nreturn [{ json: { ...$json, result: { route: `${args.from_city || 'Origin'} to ${args.to_city || 'Destination'}`, estimated_cost: `PKR ${cost.toLocaleString()}`, mode: 'Bus or economy train estimate' } } }];"
+        "jsCode": "const plan = $json.plan || {};\nconst results = $json.results || {};\nconst calls = $json.tool_calls || [];\nif (plan.transport) {\n  const routes = { 'lahore-karachi': 7500, 'islamabad-lahore': 3200, 'islamabad-karachi': 9000 };\n  const fromCity = String(plan.from_city || 'Islamabad').toLowerCase();\n  const toCity = String(plan.to_city || plan.city || 'Lahore').toLowerCase();\n  const key = `${fromCity}-${toCity}`;\n  const reverse = `${toCity}-${fromCity}`;\n  const cost = routes[key] || routes[reverse] || 5000;\n  results.transport = { route: `${plan.from_city || 'Islamabad'} to ${plan.to_city || plan.city || 'Lahore'}`, estimated_cost: `PKR ${cost.toLocaleString()}`, estimated_cost_pkr: cost, mode: 'Bus or economy train estimate' };\n  calls.push({ tool_name: 'get_transport_cost', arguments: { from_city: plan.from_city || 'Islamabad', to_city: plan.to_city || plan.city || 'Lahore' }, result: results.transport });\n}\nreturn [{ json: { ...$json, results, tool_calls: calls } }];"
       },
       "id": "3c875a27-00dc-424d-9803-44cde51f9555",
       "name": "Transport Cost Tool",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        580,
-        250
+        960,
+        0
       ]
     },
     {
       "parameters": {
-        "jsCode": "const current = $items('Turn Counter').at(-1).json;\nconst args = $json.arguments || {};\nconst toolName = $json.tool_name;\nconst toolCallId = $json.tool_call_id || `${toolName}-${Date.now()}`;\n\nconst assistantMessage = {\n  role: 'assistant',\n  content: null,\n  tool_calls: [{\n    id: toolCallId,\n    type: 'function',\n    function: {\n      name: toolName,\n      arguments: JSON.stringify(args),\n    },\n  }],\n};\n\nconst toolMessage = {\n  role: 'tool',\n  tool_call_id: toolCallId,\n  content: JSON.stringify($json.result || {}),\n};\n\nreturn [{ json: {\n  ...current,\n  messages: [...(current.messages || []), assistantMessage, toolMessage],\n  tool_calls: [...(current.tool_calls || []), { tool_name: toolName, arguments: args, result: $json.result || {} }],\n} }];"
+        "jsCode": "const results = $json.results || {};\nconst parts = [];\nif (results.room) parts.push(`Room near ${results.room.university} in ${results.room.city}: ${results.room.monthly_room_cost} per month (${results.room.note})`);\nif (results.transport) parts.push(`Transport ${results.transport.route}: ${results.transport.estimated_cost} by ${results.transport.mode}.`);\nif (results.weather) parts.push(`Weather in ${results.weather.city}: ${results.weather.temperature}, ${results.weather.condition}, humidity ${results.weather.humidity}.`);\nif (results.currency) parts.push(`Converted estimated cost: ${results.currency.converted} (${results.currency.original}).`);\nconst note = $json.llm_rate_limited ? ' Groq was rate-limited, so the workflow used the deterministic local tool router.' : '';\nreturn [{ json: { ...$json, final_answer: `${parts.join(' ')}${note}`.trim() || 'No matching tool was required.', tool_call_count: ($json.tool_calls || []).length } }];"
       },
       "id": "3303fd57-6d84-49c2-a7cc-bb22f4a8c71f",
       "name": "Inject Tool Result",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        890,
+        1180,
         0
       ]
     },
     {
       "parameters": {
         "respondWith": "json",
-        "responseBody": "={{ (() => { const calls = $json.tool_calls || $items('Turn Counter').at(-1).json.tool_calls || []; const fallback = calls.length ? 'Collected tool results: ' + calls.map(c => `${c.tool_name}: ${JSON.stringify(c.result || {})}`).join('; ') : 'Stopped after max turns. Try a shorter query or wait for the Groq TPM window to reset.'; return { answer: $json.final_answer || $json.choices?.[0]?.message?.content || fallback, tool_call_count: calls.length, tool_calls: calls, domain: 'Student Hostel Planner' }; })() }}",
+        "responseBody": "={{ { answer: $json.final_answer || 'No final answer generated.', tool_call_count: $json.tool_call_count || ($json.tool_calls || []).length, tool_calls: $json.tool_calls || [], domain: 'Student Hostel Planner', turn_count: $json.turn_count || 1 } }}",
         "options": {}
       },
       "id": "b5c06f19-6ead-4823-a52c-f591a61f6896",
@@ -295,20 +239,7 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
       "position": [
-        580,
-        480
-      ]
-    },
-    {
-      "parameters": {
-        "jsCode": "const response = $json;\nconst message = response.choices?.[0]?.message || {};\nconst toolCall = message.tool_calls?.[0];\nconst current = $items('Turn Counter').at(-1).json;\nconst calls = current.tool_calls || [];\n\nconst stable = (value) => JSON.stringify(value || {}, Object.keys(value || {}).sort());\nconst collectedAnswer = (prefix = 'Final answer from collected tool results') => {\n  if (!calls.length) return message.content || 'No final answer generated.';\n  const details = calls.map((call) => `${call.tool_name}: ${JSON.stringify(call.result || {})}`).join('; ');\n  return `${prefix}: ${details}`;\n};\n\nif (!toolCall || !toolCall.function?.name) {\n  return [{ json: {\n    route: 'final',\n    final_answer: message.content || collectedAnswer(),\n    tool_calls: calls,\n    turn_count: current.turn_count || 0,\n    messages: current.messages || [],\n    llm_response: response\n  } }];\n}\n\nlet args = {};\ntry {\n  args = JSON.parse(toolCall.function.arguments || '{}');\n} catch (error) {\n  args = {};\n}\n\nconst requestedSignature = `${toolCall.function.name}:${stable(args)}`;\nconst isDuplicate = calls.some((call) => `${call.tool_name}:${stable(call.arguments)}` === requestedSignature);\nif (isDuplicate || calls.length >= 4) {\n  return [{ json: {\n    route: 'final',\n    final_answer: collectedAnswer('Stopped to avoid repeated tool calls'),\n    tool_calls: calls,\n    turn_count: current.turn_count || 0,\n    messages: current.messages || [],\n    llm_response: response\n  } }];\n}\n\nreturn [{ json: {\n  route: toolCall.function.name,\n  tool_call_id: toolCall.id,\n  tool_name: toolCall.function.name,\n  arguments: args,\n  llm_response: response\n} }];"
-      },
-      "id": "d70ccde1-3a4b-4b7d-a2fd-7f113ac4f2b1",
-      "name": "Normalize LLM Response",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        80,
+        1400,
         0
       ]
     }
@@ -369,7 +300,7 @@
       "main": [
         [
           {
-            "node": "Normalize LLM Response",
+            "node": "Detect Tool Call",
             "type": "main",
             "index": 0
           }
@@ -384,34 +315,6 @@
             "type": "main",
             "index": 0
           }
-        ],
-        [
-          {
-            "node": "Currency Tool",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Room Cost Tool",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Transport Cost Tool",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Final Response",
-            "type": "main",
-            "index": 0
-          }
         ]
       ]
     },
@@ -419,7 +322,29 @@
       "main": [
         [
           {
-            "node": "Inject Tool Result",
+            "node": "Room Cost Tool",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Room Cost Tool": {
+      "main": [
+        [
+          {
+            "node": "Transport Cost Tool",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transport Cost Tool": {
+      "main": [
+        [
+          {
+            "node": "Currency Tool",
             "type": "main",
             "index": 0
           }
@@ -437,44 +362,11 @@
         ]
       ]
     },
-    "Room Cost Tool": {
-      "main": [
-        [
-          {
-            "node": "Inject Tool Result",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Transport Cost Tool": {
-      "main": [
-        [
-          {
-            "node": "Inject Tool Result",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Inject Tool Result": {
       "main": [
         [
           {
-            "node": "Turn Counter",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Normalize LLM Response": {
-      "main": [
-        [
-          {
-            "node": "Detect Tool Call",
+            "node": "Final Response",
             "type": "main",
             "index": 0
           }
