@@ -39,7 +39,7 @@
             {
               "id": "messages",
               "name": "messages",
-              "value": "={{ [ { role: 'system', content: 'You are a Pakistani Student Hostel Planner. Use tools for hostel room cost, transport cost, weather, and currency. Return final JSON when enough data is collected.' }, { role: 'user', content: $json.body.query } ] }}",
+              "value": "={{ [ { role: 'system', content: 'You are a Pakistani Student Hostel Planner. Use tools for hostel room cost, transport cost, weather, and currency. Request at most one tool call per turn so the Switch node can route it. Return a final answer when enough data is collected.' }, { role: 'user', content: $json.body.query } ] }}",
               "type": "array"
             }
           ]
@@ -90,7 +90,7 @@
           "number": [
             {
               "value1": "={{ $json.turn_count }}",
-              "operation": "larger",
+              "operation": "smallerEqual",
               "value2": 4
             }
           ]
@@ -273,8 +273,8 @@
     },
     "Stop After 4 Turns": {
       "main": [
-        [{ "node": "Final Response", "type": "main", "index": 0 }],
-        [{ "node": "Travel Assistant LLM", "type": "main", "index": 0 }]
+        [{ "node": "Travel Assistant LLM", "type": "main", "index": 0 }],
+        [{ "node": "Final Response", "type": "main", "index": 0 }]
       ]
     },
     "Travel Assistant LLM": {
