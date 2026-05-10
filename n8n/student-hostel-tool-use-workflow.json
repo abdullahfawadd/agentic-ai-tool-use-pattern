@@ -12,7 +12,10 @@
       "name": "Webhook",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
-      "position": [-1040, 0]
+      "position": [
+        -1040,
+        0
+      ]
     },
     {
       "parameters": {
@@ -39,7 +42,7 @@
             {
               "id": "messages",
               "name": "messages",
-              "value": "={{ [ { role: 'system', content: 'You are a Pakistani Student Hostel Planner. Use tools for hostel room cost, transport cost, weather, and currency. Request at most one tool call per turn so the Switch node can route it. Return a final answer when enough data is collected.' }, { role: 'user', content: $json.body.query } ] }}",
+              "value": "={{ [ { role: 'system', content: 'You are a Pakistani Student Hostel Planner. Use tools for hostel room cost, transport cost, weather, and currency. Request at most one tool call per turn so the Switch node can route it. Never invent room cost, transport cost, weather, or currency values. If the user asks for one of those facts and the result is not already in the conversation, call the matching tool before giving a final answer. Return a final answer only after enough tool results are collected.' }, { role: 'user', content: $json.body.query } ] }}",
               "type": "array"
             }
           ]
@@ -50,7 +53,10 @@
       "name": "Initialize State",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
-      "position": [-820, 0]
+      "position": [
+        -820,
+        0
+      ]
     },
     {
       "parameters": {
@@ -82,7 +88,10 @@
       "name": "Turn Counter",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
-      "position": [-600, 0]
+      "position": [
+        -600,
+        0
+      ]
     },
     {
       "parameters": {
@@ -101,7 +110,10 @@
       "name": "Stop After 4 Turns",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
-      "position": [-380, 0]
+      "position": [
+        -380,
+        0
+      ]
     },
     {
       "parameters": {
@@ -122,14 +134,17 @@
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ { model: 'llama-3.1-8b-instant', messages: $json.messages, temperature: 0.2, tool_choice: 'auto', tools: [ { type: 'function', function: { name: 'get_weather', description: 'Get simulated weather for a Pakistani city.', parameters: { type: 'object', properties: { city: { type: 'string' } }, required: ['city'] } } }, { type: 'function', function: { name: 'convert_currency', description: 'Convert a cost between PKR, USD, GBP, or AED.', parameters: { type: 'object', properties: { amount: { type: 'number' }, from_currency: { type: 'string' }, to_currency: { type: 'string' } }, required: ['amount', 'from_currency', 'to_currency'] } } }, { type: 'function', function: { name: 'get_room_cost', description: 'Get monthly hostel room cost near a Pakistani university. Call this for room rent or hostel cost.', parameters: { type: 'object', properties: { city: { type: 'string' }, university: { type: 'string' } }, required: ['city', 'university'] } } }, { type: 'function', function: { name: 'get_transport_cost', description: 'Estimate student transport cost between Pakistani cities.', parameters: { type: 'object', properties: { from_city: { type: 'string' }, to_city: { type: 'string' } }, required: ['from_city', 'to_city'] } } } ] } }}",
+        "jsonBody": "={{ { model: 'llama-3.1-8b-instant', messages: $json.messages, temperature: 0.2, tool_choice: 'auto', parallel_tool_calls: false, tools: [ { type: 'function', function: { name: 'get_weather', description: 'Get simulated weather for a Pakistani city.', parameters: { type: 'object', properties: { city: { type: 'string' } }, required: ['city'] } } }, { type: 'function', function: { name: 'convert_currency', description: 'Convert a cost between PKR, USD, GBP, or AED.', parameters: { type: 'object', properties: { amount: { type: 'number' }, from_currency: { type: 'string' }, to_currency: { type: 'string' } }, required: ['amount', 'from_currency', 'to_currency'] } } }, { type: 'function', function: { name: 'get_room_cost', description: 'Get monthly hostel room cost near a Pakistani university. Call this for room rent or hostel cost.', parameters: { type: 'object', properties: { city: { type: 'string' }, university: { type: 'string' } }, required: ['city', 'university'] } } }, { type: 'function', function: { name: 'get_transport_cost', description: 'Estimate student transport cost between Pakistani cities.', parameters: { type: 'object', properties: { from_city: { type: 'string' }, to_city: { type: 'string' } }, required: ['from_city', 'to_city'] } } } ] } }}",
         "options": {}
       },
       "id": "a028e8ec-2b21-48ea-9422-b70cf7b700ad",
       "name": "Travel Assistant LLM",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [-120, 0]
+      "position": [
+        -160,
+        0
+      ]
     },
     {
       "parameters": {
@@ -139,7 +154,7 @@
               "conditions": {
                 "string": [
                   {
-                    "value1": "={{ $json.choices?.[0]?.message?.tool_calls?.[0]?.function?.name || 'final' }}",
+                    "value1": "={{ $json.route || 'final' }}",
                     "operation": "equals",
                     "value2": "get_weather"
                   }
@@ -152,7 +167,7 @@
               "conditions": {
                 "string": [
                   {
-                    "value1": "={{ $json.choices?.[0]?.message?.tool_calls?.[0]?.function?.name || 'final' }}",
+                    "value1": "={{ $json.route || 'final' }}",
                     "operation": "equals",
                     "value2": "convert_currency"
                   }
@@ -165,7 +180,7 @@
               "conditions": {
                 "string": [
                   {
-                    "value1": "={{ $json.choices?.[0]?.message?.tool_calls?.[0]?.function?.name || 'final' }}",
+                    "value1": "={{ $json.route || 'final' }}",
                     "operation": "equals",
                     "value2": "get_room_cost"
                   }
@@ -178,7 +193,7 @@
               "conditions": {
                 "string": [
                   {
-                    "value1": "={{ $json.choices?.[0]?.message?.tool_calls?.[0]?.function?.name || 'final' }}",
+                    "value1": "={{ $json.route || 'final' }}",
                     "operation": "equals",
                     "value2": "get_transport_cost"
                   }
@@ -196,113 +211,272 @@
       "name": "Detect Tool Call",
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3,
-      "position": [120, 0]
+      "position": [
+        300,
+        0
+      ]
     },
     {
       "parameters": {
-        "jsCode": "const toolCall = $json.choices[0].message.tool_calls[0];\nconst args = JSON.parse(toolCall.function.arguments || '{}');\nconst weather = {\n  islamabad: { temperature: '28 deg C', condition: 'Partly Cloudy', humidity: '55%' },\n  karachi: { temperature: '34 deg C', condition: 'Hot and Sunny', humidity: '70%' },\n  lahore: { temperature: '32 deg C', condition: 'Hazy', humidity: '60%' }\n};\nconst city = (args.city || 'Islamabad').toLowerCase();\nreturn [{ json: { tool_call_id: toolCall.id, tool_name: 'get_weather', arguments: args, result: { city: args.city || 'Islamabad', ...(weather[city] || weather.islamabad) } } }];"
+        "jsCode": "const args = $json.arguments || {};\nconst weather = {\n  islamabad: { temperature: '28 deg C', condition: 'Partly Cloudy', humidity: '55%' },\n  karachi: { temperature: '34 deg C', condition: 'Hot and Sunny', humidity: '70%' },\n  lahore: { temperature: '32 deg C', condition: 'Hazy', humidity: '60%' }\n};\nconst city = String(args.city || 'Islamabad').toLowerCase();\nreturn [{ json: { ...$json, result: { city: args.city || 'Islamabad', ...(weather[city] || weather.islamabad) } } }];"
       },
       "id": "e7720951-a305-4e9d-b526-a9d2cc84059e",
       "name": "Weather Tool",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [400, -240]
+      "position": [
+        580,
+        -260
+      ]
     },
     {
       "parameters": {
-        "jsCode": "const toolCall = $json.choices[0].message.tool_calls[0];\nconst args = JSON.parse(toolCall.function.arguments || '{}');\nconst rates = { PKR: 1, USD: 278.5, GBP: 352, AED: 75.8 };\nconst from = String(args.from_currency || 'PKR').toUpperCase();\nconst to = String(args.to_currency || 'PKR').toUpperCase();\nconst pkr = Number(args.amount || 0) * rates[from];\nconst converted = pkr / rates[to];\nreturn [{ json: { tool_call_id: toolCall.id, tool_name: 'convert_currency', arguments: args, result: { original: `${args.amount} ${from}`, converted: `${converted.toFixed(2)} ${to}` } } }];"
+        "jsCode": "const args = $json.arguments || {};\nconst rates = { PKR: 1, USD: 278.5, GBP: 352, AED: 75.8 };\nconst from = String(args.from_currency || 'PKR').toUpperCase();\nconst to = String(args.to_currency || 'PKR').toUpperCase();\nconst amount = Number(args.amount || 0);\nconst pkr = amount * (rates[from] || 1);\nconst converted = pkr / (rates[to] || 1);\nreturn [{ json: { ...$json, result: { original: `${amount} ${from}`, converted: `${converted.toFixed(2)} ${to}` } } }];"
       },
       "id": "34f3e472-f452-4b89-b8f6-3cf6d81b4e8c",
       "name": "Currency Tool",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [400, -80]
+      "position": [
+        580,
+        -90
+      ]
     },
     {
       "parameters": {
-        "jsCode": "const toolCall = $json.choices[0].message.tool_calls[0];\nconst args = JSON.parse(toolCall.function.arguments || '{}');\nconst city = String(args.city || 'Lahore').toLowerCase();\nconst base = city === 'islamabad' ? 32000 : city === 'karachi' ? 26000 : 24000;\nreturn [{ json: { tool_call_id: toolCall.id, tool_name: 'get_room_cost', arguments: args, result: { city: args.city || 'Lahore', university: args.university || 'University area', monthly_room_cost: `PKR ${base.toLocaleString()}`, note: 'Shared hostel room estimate near campus.' } } }];"
+        "jsCode": "const args = $json.arguments || {};\nconst city = String(args.city || 'Lahore').toLowerCase();\nconst base = city === 'islamabad' ? 32000 : city === 'karachi' ? 26000 : 24000;\nreturn [{ json: { ...$json, result: { city: args.city || 'Lahore', university: args.university || 'University area', monthly_room_cost: `PKR ${base.toLocaleString()}`, note: 'Shared hostel room estimate near campus.' } } }];"
       },
       "id": "3dbac1e1-dcb3-4884-b343-73d8e15f2aca",
       "name": "Room Cost Tool",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [400, 80]
+      "position": [
+        580,
+        80
+      ]
     },
     {
       "parameters": {
-        "jsCode": "const toolCall = $json.choices[0].message.tool_calls[0];\nconst args = JSON.parse(toolCall.function.arguments || '{}');\nconst routes = { 'lahore-karachi': 7500, 'islamabad-lahore': 3200, 'islamabad-karachi': 9000 };\nconst key = `${String(args.from_city || '').toLowerCase()}-${String(args.to_city || '').toLowerCase()}`;\nconst reverse = `${String(args.to_city || '').toLowerCase()}-${String(args.from_city || '').toLowerCase()}`;\nconst cost = routes[key] || routes[reverse] || 5000;\nreturn [{ json: { tool_call_id: toolCall.id, tool_name: 'get_transport_cost', arguments: args, result: { route: `${args.from_city} to ${args.to_city}`, estimated_cost: `PKR ${cost.toLocaleString()}`, mode: 'Bus or economy train estimate' } } }];"
+        "jsCode": "const args = $json.arguments || {};\nconst routes = { 'lahore-karachi': 7500, 'islamabad-lahore': 3200, 'islamabad-karachi': 9000 };\nconst fromCity = String(args.from_city || '').toLowerCase();\nconst toCity = String(args.to_city || '').toLowerCase();\nconst key = `${fromCity}-${toCity}`;\nconst reverse = `${toCity}-${fromCity}`;\nconst cost = routes[key] || routes[reverse] || 5000;\nreturn [{ json: { ...$json, result: { route: `${args.from_city || 'Origin'} to ${args.to_city || 'Destination'}`, estimated_cost: `PKR ${cost.toLocaleString()}`, mode: 'Bus or economy train estimate' } } }];"
       },
       "id": "3c875a27-00dc-424d-9803-44cde51f9555",
       "name": "Transport Cost Tool",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [400, 240]
+      "position": [
+        580,
+        250
+      ]
     },
     {
       "parameters": {
-        "jsCode": "const current = $items('Turn Counter').at(-1).json;\nconst toolMessage = { role: 'tool', tool_call_id: $json.tool_call_id, content: JSON.stringify($json.result) };\nconst assistantMessage = $items('Travel Assistant LLM').at(-1).json.choices[0].message;\nreturn [{ json: { ...current, messages: [...current.messages, assistantMessage, toolMessage], tool_calls: [...(current.tool_calls || []), { tool_name: $json.tool_name, arguments: $json.arguments, result: $json.result }] } }];"
+        "jsCode": "const current = $items('Turn Counter').at(-1).json;\nconst assistantMessage = $json.assistant_message || {\n  role: 'assistant',\n  content: null,\n  tool_calls: [{\n    id: $json.tool_call_id,\n    type: 'function',\n    function: { name: $json.tool_name, arguments: JSON.stringify($json.arguments || {}) }\n  }]\n};\nconst toolMessage = { role: 'tool', tool_call_id: $json.tool_call_id, content: JSON.stringify($json.result) };\nreturn [{ json: {\n  ...current,\n  messages: [...(current.messages || []), assistantMessage, toolMessage],\n  tool_calls: [...(current.tool_calls || []), { tool_name: $json.tool_name, arguments: $json.arguments || {}, result: $json.result }]\n} }];"
       },
       "id": "3303fd57-6d84-49c2-a7cc-bb22f4a8c71f",
       "name": "Inject Tool Result",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [700, 0]
+      "position": [
+        890,
+        0
+      ]
     },
     {
       "parameters": {
         "respondWith": "json",
-        "responseBody": "={{ { answer: $json.choices?.[0]?.message?.content || 'Stopped after max turns. Review tool_calls for partial results.', tool_call_count: ($items('Turn Counter').at(-1).json.tool_calls || []).length, tool_calls: $items('Turn Counter').at(-1).json.tool_calls || [], domain: 'Student Hostel Planner' } }}",
+        "responseBody": "={{ { answer: $json.final_answer || $json.choices?.[0]?.message?.content || 'Stopped after max turns. Review tool_calls for partial results.', tool_call_count: ($json.tool_calls || $items('Turn Counter').at(-1).json.tool_calls || []).length, tool_calls: $json.tool_calls || $items('Turn Counter').at(-1).json.tool_calls || [], domain: 'Student Hostel Planner' } }}",
         "options": {}
       },
       "id": "b5c06f19-6ead-4823-a52c-f591a61f6896",
       "name": "Final Response",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
-      "position": [420, 480]
+      "position": [
+        580,
+        480
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const response = $json;\nconst message = response.choices?.[0]?.message || {};\nconst toolCall = message.tool_calls?.[0];\nconst current = $items('Turn Counter').at(-1).json;\n\nif (!toolCall) {\n  return [{ json: {\n    route: 'final',\n    final_answer: message.content || 'No final answer generated.',\n    tool_calls: current.tool_calls || [],\n    turn_count: current.turn_count || 0,\n    messages: current.messages || [],\n    llm_response: response\n  } }];\n}\n\nlet args = {};\ntry {\n  args = JSON.parse(toolCall.function.arguments || '{}');\n} catch (error) {\n  args = {};\n}\n\nreturn [{ json: {\n  route: toolCall.function.name,\n  tool_call_id: toolCall.id,\n  tool_name: toolCall.function.name,\n  arguments: args,\n  assistant_message: message,\n  llm_response: response\n} }];"
+      },
+      "id": "d70ccde1-3a4b-4b7d-a2fd-7f113ac4f2b1",
+      "name": "Normalize LLM Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        80,
+        0
+      ]
     }
   ],
   "connections": {
     "Webhook": {
-      "main": [[{ "node": "Initialize State", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Initialize State",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Initialize State": {
-      "main": [[{ "node": "Turn Counter", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Turn Counter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Turn Counter": {
-      "main": [[{ "node": "Stop After 4 Turns", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Stop After 4 Turns",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Stop After 4 Turns": {
       "main": [
-        [{ "node": "Travel Assistant LLM", "type": "main", "index": 0 }],
-        [{ "node": "Final Response", "type": "main", "index": 0 }]
+        [
+          {
+            "node": "Travel Assistant LLM",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Final Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Travel Assistant LLM": {
-      "main": [[{ "node": "Detect Tool Call", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Normalize LLM Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Detect Tool Call": {
       "main": [
-        [{ "node": "Weather Tool", "type": "main", "index": 0 }],
-        [{ "node": "Currency Tool", "type": "main", "index": 0 }],
-        [{ "node": "Room Cost Tool", "type": "main", "index": 0 }],
-        [{ "node": "Transport Cost Tool", "type": "main", "index": 0 }],
-        [{ "node": "Final Response", "type": "main", "index": 0 }]
+        [
+          {
+            "node": "Weather Tool",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Currency Tool",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Room Cost Tool",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Transport Cost Tool",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Final Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Weather Tool": {
-      "main": [[{ "node": "Inject Tool Result", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Inject Tool Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Currency Tool": {
-      "main": [[{ "node": "Inject Tool Result", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Inject Tool Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Room Cost Tool": {
-      "main": [[{ "node": "Inject Tool Result", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Inject Tool Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Transport Cost Tool": {
-      "main": [[{ "node": "Inject Tool Result", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Inject Tool Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Inject Tool Result": {
-      "main": [[{ "node": "Turn Counter", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Turn Counter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize LLM Response": {
+      "main": [
+        [
+          {
+            "node": "Detect Tool Call",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "pinData": {},
