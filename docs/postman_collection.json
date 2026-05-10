@@ -1,0 +1,109 @@
+{
+  "info": {
+    "name": "Lab 08 Tool Use Pattern - M Abdullah Fawad",
+    "_postman_id": "b6d2a3f6-7dd7-4fc7-a8ef-f1f3d47c4e88",
+    "description": "Postman collection for testing the FastAPI Tool Use Pattern lab submission.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://127.0.0.1:8000"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health - four tools",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/health"
+      }
+    },
+    {
+      "name": "Single tool - Dubai weather",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"query\": \"What is the current weather in Dubai?\",\n  \"max_turns\": 5\n}"
+        },
+        "url": "{{base_url}}/plan"
+      }
+    },
+    {
+      "name": "Multi tool - London trip",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"query\": \"I want to travel from Islamabad to London for 2 people. What will it cost in GBP, and what is the weather like there?\",\n  \"max_turns\": 5\n}"
+        },
+        "url": "{{base_url}}/plan"
+      }
+    },
+    {
+      "name": "Safety limit - max turns 1",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"query\": \"Plan a complete Dubai trip for 3 people: weather, cost, and currency.\",\n  \"max_turns\": 1\n}"
+        },
+        "url": "{{base_url}}/plan"
+      }
+    },
+    {
+      "name": "Prayer times - Islamabad",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"query\": \"What are the prayer times in Islamabad today?\",\n  \"max_turns\": 5\n}"
+        },
+        "url": "{{base_url}}/plan"
+      }
+    },
+    {
+      "name": "Combined query - Karachi",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"query\": \"Plan a trip to Karachi: weather, prayer times, and flight cost from Lahore.\",\n  \"max_turns\": 5\n}"
+        },
+        "url": "{{base_url}}/plan"
+      }
+    }
+  ]
+}

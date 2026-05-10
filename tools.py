@@ -103,7 +103,7 @@ def estimate_flight_cost(origin: str, destination: str, passengers: int = 1) -> 
     total = base * safe_passengers
 
     return {
-        "route": f"{origin.title()} -> {destination.title()}",
+        "route": f"{origin.title()} to {destination.title()}",
         "passengers": safe_passengers,
         "per_person": f"PKR {base:,}",
         "total_cost": f"PKR {total:,}",

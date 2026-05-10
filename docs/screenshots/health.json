@@ -1,0 +1,13 @@
+{
+    "status":  "ok",
+    "student":  "M Abdullah Fawad",
+    "model":  "llama-3.1-8b-instant",
+    "demo_mode":  true,
+    "tools":  [
+                  "get_weather",
+                  "convert_currency",
+                  "estimate_flight_cost",
+                  "get_prayer_times"
+              ]
+}
+

@@ -1,0 +1,56 @@
+{
+    "answer":  "Flight estimate for Lahore to Karachi is PKR 9,500 for 1 passenger(s). Karachi weather is 34 deg C, Hot and Sunny, humidity 70%. Prayer times for Karachi on today: Fajr 04:38 AM, Dhuhr 12:29 PM, Asr 05:03 PM, Maghrib 07:09 PM, Isha 08:28 PM.",
+    "tool_calls":  [
+                       {
+                           "tool_name":  "estimate_flight_cost",
+                           "arguments":  {
+                                             "origin":  "Lahore",
+                                             "destination":  "Karachi",
+                                             "passengers":  1
+                                         },
+                           "result":  {
+                                          "route":  "Lahore to Karachi",
+                                          "passengers":  1,
+                                          "per_person":  "PKR 9,500",
+                                          "total_cost":  "PKR 9,500",
+                                          "note":  "Economy class estimate. Actual prices may vary.",
+                                          "source":  "Simulated lab fare table"
+                                      }
+                       },
+                       {
+                           "tool_name":  "get_weather",
+                           "arguments":  {
+                                             "city":  "Karachi",
+                                             "unit":  "celsius"
+                                         },
+                           "result":  {
+                                          "city":  "Karachi",
+                                          "temperature":  "34 deg C",
+                                          "condition":  "Hot and Sunny",
+                                          "humidity":  "70%",
+                                          "source":  "Simulated lab dataset"
+                                      }
+                       },
+                       {
+                           "tool_name":  "get_prayer_times",
+                           "arguments":  {
+                                             "city":  "Karachi",
+                                             "date":  "today"
+                                         },
+                           "result":  {
+                                          "city":  "Karachi",
+                                          "date":  "today",
+                                          "Fajr":  "04:38 AM",
+                                          "Dhuhr":  "12:29 PM",
+                                          "Asr":  "05:03 PM",
+                                          "Maghrib":  "07:09 PM",
+                                          "Isha":  "08:28 PM",
+                                          "calculation_note":  "Simulated lab dataset for demonstration. Verify locally for worship use.",
+                                          "source":  "Simulated Pakistani prayer-time table"
+                                      }
+                       }
+                   ],
+    "turn_count":  3,
+    "model":  "llama-3.1-8b-instant (demo mode)"
+}
+

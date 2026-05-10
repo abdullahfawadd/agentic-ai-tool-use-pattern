@@ -1,0 +1,24 @@
+{
+    "answer":  "Flight estimate for Islamabad to Dubai is PKR 105,000 for 3 passenger(s). The max_turns safety limit stopped additional tool calls.",
+    "tool_calls":  [
+                       {
+                           "tool_name":  "estimate_flight_cost",
+                           "arguments":  {
+                                             "origin":  "Islamabad",
+                                             "destination":  "Dubai",
+                                             "passengers":  3
+                                         },
+                           "result":  {
+                                          "route":  "Islamabad to Dubai",
+                                          "passengers":  3,
+                                          "per_person":  "PKR 35,000",
+                                          "total_cost":  "PKR 105,000",
+                                          "note":  "Economy class estimate. Actual prices may vary.",
+                                          "source":  "Simulated lab fare table"
+                                      }
+                       }
+                   ],
+    "turn_count":  1,
+    "model":  "llama-3.1-8b-instant (demo mode)"
+}
+

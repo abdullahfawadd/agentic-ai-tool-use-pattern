@@ -1,0 +1,26 @@
+{
+    "answer":  "Prayer times for Islamabad on today: Fajr 04:02 AM, Dhuhr 12:08 PM, Asr 04:55 PM, Maghrib 07:02 PM, Isha 08:30 PM.",
+    "tool_calls":  [
+                       {
+                           "tool_name":  "get_prayer_times",
+                           "arguments":  {
+                                             "city":  "Islamabad",
+                                             "date":  "today"
+                                         },
+                           "result":  {
+                                          "city":  "Islamabad",
+                                          "date":  "today",
+                                          "Fajr":  "04:02 AM",
+                                          "Dhuhr":  "12:08 PM",
+                                          "Asr":  "04:55 PM",
+                                          "Maghrib":  "07:02 PM",
+                                          "Isha":  "08:30 PM",
+                                          "calculation_note":  "Simulated lab dataset for demonstration. Verify locally for worship use.",
+                                          "source":  "Simulated Pakistani prayer-time table"
+                                      }
+                       }
+                   ],
+    "turn_count":  1,
+    "model":  "llama-3.1-8b-instant (demo mode)"
+}
+

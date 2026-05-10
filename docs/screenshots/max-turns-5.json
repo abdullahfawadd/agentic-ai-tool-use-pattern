@@ -1,0 +1,52 @@
+{
+    "answer":  "Flight estimate for Islamabad to Dubai is PKR 105,000 for 3 passenger(s). Currency conversion: 170000 PKR = 482.95 GBP. Dubai weather is 40 deg C, Clear and Hot, humidity 45%.",
+    "tool_calls":  [
+                       {
+                           "tool_name":  "estimate_flight_cost",
+                           "arguments":  {
+                                             "origin":  "Islamabad",
+                                             "destination":  "Dubai",
+                                             "passengers":  3
+                                         },
+                           "result":  {
+                                          "route":  "Islamabad to Dubai",
+                                          "passengers":  3,
+                                          "per_person":  "PKR 35,000",
+                                          "total_cost":  "PKR 105,000",
+                                          "note":  "Economy class estimate. Actual prices may vary.",
+                                          "source":  "Simulated lab fare table"
+                                      }
+                       },
+                       {
+                           "tool_name":  "convert_currency",
+                           "arguments":  {
+                                             "amount":  170000,
+                                             "from_currency":  "PKR",
+                                             "to_currency":  "GBP"
+                                         },
+                           "result":  {
+                                          "original":  "170000 PKR",
+                                          "converted":  "482.95 GBP",
+                                          "rate":  "1 PKR = 0.0028 GBP",
+                                          "source":  "Simulated lab exchange-rate table"
+                                      }
+                       },
+                       {
+                           "tool_name":  "get_weather",
+                           "arguments":  {
+                                             "city":  "Dubai",
+                                             "unit":  "celsius"
+                                         },
+                           "result":  {
+                                          "city":  "Dubai",
+                                          "temperature":  "40 deg C",
+                                          "condition":  "Clear and Hot",
+                                          "humidity":  "45%",
+                                          "source":  "Simulated lab dataset"
+                                      }
+                       }
+                   ],
+    "turn_count":  3,
+    "model":  "llama-3.1-8b-instant (demo mode)"
+}
+

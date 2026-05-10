@@ -1,0 +1,3 @@
+# Graded Task 1 Reflection
+
+Adding `get_prayer_times` without changing `main.py` shows that the Tool Use Pattern separates the agent loop from the tools it can use. The loop only knows how to pass schemas to the model, receive structured tool calls, execute registered functions, and inject results back into context. New capabilities are added through the schema registry and function map, not by rewriting the reasoning loop. This makes the system easier to maintain because each tool can evolve independently. It also makes agentic applications scalable: teams can add, replace, or test tools without risking the core dispatch logic.

@@ -1,0 +1,22 @@
+{
+    "answer":  "Dubai weather is 40 deg C, Clear and Hot, humidity 45%.",
+    "tool_calls":  [
+                       {
+                           "tool_name":  "get_weather",
+                           "arguments":  {
+                                             "city":  "Dubai",
+                                             "unit":  "celsius"
+                                         },
+                           "result":  {
+                                          "city":  "Dubai",
+                                          "temperature":  "40 deg C",
+                                          "condition":  "Clear and Hot",
+                                          "humidity":  "45%",
+                                          "source":  "Simulated lab dataset"
+                                      }
+                       }
+                   ],
+    "turn_count":  1,
+    "model":  "llama-3.1-8b-instant (demo mode)"
+}
+

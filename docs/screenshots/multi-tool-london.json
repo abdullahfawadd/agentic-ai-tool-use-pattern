@@ -1,0 +1,52 @@
+{
+    "answer":  "Flight estimate for Islamabad to London is PKR 170,000 for 2 passenger(s). Currency conversion: 170000 PKR = 482.95 GBP. London weather is 16 deg C, Overcast, humidity 80%.",
+    "tool_calls":  [
+                       {
+                           "tool_name":  "estimate_flight_cost",
+                           "arguments":  {
+                                             "origin":  "Islamabad",
+                                             "destination":  "London",
+                                             "passengers":  2
+                                         },
+                           "result":  {
+                                          "route":  "Islamabad to London",
+                                          "passengers":  2,
+                                          "per_person":  "PKR 85,000",
+                                          "total_cost":  "PKR 170,000",
+                                          "note":  "Economy class estimate. Actual prices may vary.",
+                                          "source":  "Simulated lab fare table"
+                                      }
+                       },
+                       {
+                           "tool_name":  "convert_currency",
+                           "arguments":  {
+                                             "amount":  170000,
+                                             "from_currency":  "PKR",
+                                             "to_currency":  "GBP"
+                                         },
+                           "result":  {
+                                          "original":  "170000 PKR",
+                                          "converted":  "482.95 GBP",
+                                          "rate":  "1 PKR = 0.0028 GBP",
+                                          "source":  "Simulated lab exchange-rate table"
+                                      }
+                       },
+                       {
+                           "tool_name":  "get_weather",
+                           "arguments":  {
+                                             "city":  "London",
+                                             "unit":  "celsius"
+                                         },
+                           "result":  {
+                                          "city":  "London",
+                                          "temperature":  "16 deg C",
+                                          "condition":  "Overcast",
+                                          "humidity":  "80%",
+                                          "source":  "Simulated lab dataset"
+                                      }
+                       }
+                   ],
+    "turn_count":  3,
+    "model":  "llama-3.1-8b-instant (demo mode)"
+}
+
